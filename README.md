@@ -2,7 +2,7 @@
 
 Navigate between Neovim floating popups like [harpoon](https://github.com/ThePrimeagen/harpoon) navigates between files.
 
-Add any floating window to a navigation list — terminals, cheatsheets, AI panels, or anything else. Cycle through them with next/prev, jump by index, or pick from a menu. Multiple popups can share the same name (e.g. several terminals).
+Add any floating window to a navigation list — terminals, cheatsheets, or anything else. Cycle through them with next/prev, jump by index, or pick from a menu. Multiple popups can share the same name (e.g. several terminals).
 
 ## Features
 
@@ -19,7 +19,7 @@ Add any floating window to a navigation list — terminals, cheatsheets, AI pane
 
 ```lua
 {
-  "yourusername/popnav.nvim",
+  "Jpifer13/popnav.nvim",
   config = function()
     require("popnav").setup({
       popups = {
@@ -41,21 +41,6 @@ Add any floating window to a navigation list — terminals, cheatsheets, AI pane
             for _, win in ipairs(vim.api.nvim_list_wins()) do
               local buf = vim.api.nvim_win_get_buf(win)
               if vim.bo[buf].filetype == "cheatsheet" then return true end
-            end
-            return false
-          end,
-        },
-        {
-          name = "Claude",
-          icon = "🤖",
-          open = function() vim.cmd("ClaudeCode") end,
-          close = function() vim.cmd("ClaudeCode") end,
-          is_open = function()
-            for _, win in ipairs(vim.api.nvim_list_wins()) do
-              if vim.api.nvim_win_get_config(win).relative ~= "" then
-                local buf = vim.api.nvim_win_get_buf(win)
-                if vim.api.nvim_buf_get_name(buf):match("claude") then return true end
-              end
             end
             return false
           end,
