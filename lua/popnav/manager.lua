@@ -13,6 +13,7 @@ end
 ---@field open fun()
 ---@field close fun()
 ---@field is_open fun(): boolean
+---@field destroy? fun()        Optional: fully tear down the popup (kill session, wipe buffer, etc.)
 ---@field icon? string
 
 ---@class PopnavPopupEntry
@@ -48,8 +49,10 @@ end
 function M.remove_at(index)
   if index < 1 or index > #M.list then return end
   local entry = M.list[index]
-  -- Close it if open
-  if entry.def.is_open() then
+  -- Destroy the popup if it supports it, otherwise just close
+  if entry.def.destroy then
+    entry.def.destroy()
+  elseif entry.def.is_open() then
     entry.def.close()
   end
   table.remove(M.list, index)
