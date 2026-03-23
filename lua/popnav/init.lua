@@ -3,6 +3,8 @@ local ui = require("popnav.ui")
 
 local M = {}
 
+M.version = "1.0.0"
+
 local defaults = {
   highlights = {
     active = { fg = "#a6e3a1", bold = true },

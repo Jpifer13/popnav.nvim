@@ -20,6 +20,7 @@ Add any floating window to a navigation list — terminals, cheatsheets, or anyt
 ```lua
 {
   "Jpifer13/popnav.nvim",
+  version = "1.*",  -- pin to major version 1 (recommended)
   config = function()
     require("popnav").setup({
       popups = {
@@ -206,3 +207,20 @@ popnav.list()            -- Get list with status info
 Each call to `popnav.add()` creates a new entry in the navigation list with a unique ID. Names are just display labels — you can have three entries all named "Terminal" if you want. The menu shows them by position, and you navigate by position (like harpoon slots).
 
 Opening a popup auto-closes whichever one is currently active, so only one popup is visible at a time. Use `next()`/`prev()` to cycle, `select(n)` to jump, or the menu to pick visually.
+
+## Versioning
+
+popnav follows [semantic versioning](https://semver.org/). Releases are tagged as `v<major>.<minor>.<patch>`.
+
+You can check the current version in Lua:
+
+```lua
+print(require("popnav").version)  -- e.g. "1.0.0"
+```
+
+To pin a version in lazy.nvim:
+
+```lua
+{ "Jpifer13/popnav.nvim", version = "1.*" }    -- latest v1.x.x (recommended)
+{ "Jpifer13/popnav.nvim", version = "=1.0.0" } -- exact version
+```
