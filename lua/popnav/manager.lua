@@ -49,7 +49,7 @@ end
 function M.remove_at(index)
   if index < 1 or index > #M.list then return end
   local entry = M.list[index]
-  -- Destroy the popup if it supports it, otherwise just close
+  -- Destroy the popup if a custom destroy is provided, otherwise just close
   if entry.def.destroy then
     entry.def.destroy()
   elseif entry.def.is_open() then

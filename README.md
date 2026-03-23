@@ -61,10 +61,11 @@ require("popnav").setup({
       name = "Terminal",       -- display name (required, duplicates OK)
       icon = "🖥",             -- shown in menu (optional)
       open = function() end,   -- open the popup (required)
-      close = function() end,  -- close the popup (required)
+      close = function() end,  -- close/hide the popup (required)
       is_open = function()     -- return true if visible (required)
         return false
       end,
+      destroy = function() end, -- fully tear down the popup (optional, see below)
     },
   },
 
@@ -76,6 +77,49 @@ require("popnav").setup({
     name = { fg = "#cdd6f4" },
   },
 })
+```
+
+### Callbacks
+
+| Callback | Required | When it's called |
+|---|---|---|
+| `open` | Yes | When navigating to this popup (select, next, prev, menu Enter) |
+| `close` | Yes | When navigating away — hides the popup but keeps any session alive |
+| `is_open` | Yes | To check if the popup's floating window is currently visible |
+| `destroy` | No | When the popup is **removed** from the list (menu `dd`, `remove_at()`, `clear()`) |
+
+### The `destroy` callback
+
+Some popups maintain a persistent session — a terminal keeps a shell process running, an AI panel keeps a connection open, etc. When these popups are navigated away from, `close` hides the window but the session stays alive so you can return to it later.
+
+When a popup is **removed from the list** entirely, you probably want to kill the session too. That's what `destroy` is for. If provided, popnav calls `destroy` instead of `close` during removal. If not provided, it falls back to `close`.
+
+Popnav can't provide a generic default for `destroy` because it doesn't track which window or buffer belongs to which popup — only your callbacks know that. So if your popup has a session that should be cleaned up on removal, you need to provide the `destroy` callback yourself.
+
+**Example: terminal with destroy**
+
+```lua
+{
+  name = "Terminal",
+  open = function() require("my_terminal").open() end,
+  close = function() require("my_terminal").close() end,      -- hides window, keeps shell
+  destroy = function() require("my_terminal").destroy() end,   -- closes window + wipes buffer + kills shell
+  is_open = function() return require("my_terminal").is_open() end,
+}
+```
+
+**Example: cheatsheet without destroy**
+
+A cheatsheet has no persistent session — the buffer is created fresh each time. No `destroy` needed; `close` is sufficient.
+
+```lua
+{
+  name = "Cheatsheet",
+  open = function() require("cheatsheet").open() end,
+  close = function() vim.cmd("close") end,
+  is_open = function() ... end,
+  -- no destroy needed
+}
 ```
 
 ## Keymaps
