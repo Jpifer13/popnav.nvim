@@ -1,5 +1,13 @@
 local M = {}
 
+--- Check if the currently focused window is a floating window
+---@return boolean
+local function current_win_is_float()
+  local win = vim.api.nvim_get_current_win()
+  local config = vim.api.nvim_win_get_config(win)
+  return config.relative and config.relative ~= ""
+end
+
 ---@class PopnavPopupDef
 ---@field name string           Display name (not required to be unique)
 ---@field open fun()
@@ -106,6 +114,24 @@ function M.close_active()
   M.active_index = nil
 end
 
+--- Open a popup and validate it produced a floating window
+---@param entry PopnavPopupEntry
+---@return boolean success
+local function open_and_validate(entry)
+  entry.def.open()
+  -- Allow a brief moment for async openers, then check
+  if not current_win_is_float() then
+    vim.notify(
+      "popnav: '" .. entry.def.name .. "' did not open a floating window — only floats are supported",
+      vim.log.levels.WARN
+    )
+    -- Attempt to clean up whatever was opened
+    pcall(entry.def.close)
+    return false
+  end
+  return true
+end
+
 --- Open a popup by its position in the navigation list
 ---@param index integer
 function M.select(index)
@@ -118,8 +144,9 @@ function M.select(index)
     M.active_index = nil
   else
     M.close_active()
-    entry.def.open()
-    M.active_index = index
+    if open_and_validate(entry) then
+      M.active_index = index
+    end
   end
 end
 
@@ -129,8 +156,9 @@ function M.next()
   local current = M.active_index or 0
   local next_index = (current % #M.list) + 1
   M.close_active()
-  M.list[next_index].def.open()
-  M.active_index = next_index
+  if open_and_validate(M.list[next_index]) then
+    M.active_index = next_index
+  end
 end
 
 --- Navigate to the previous popup in the list
@@ -139,8 +167,9 @@ function M.prev()
   local current = M.active_index or 2
   local prev_index = ((current - 2) % #M.list) + 1
   M.close_active()
-  M.list[prev_index].def.open()
-  M.active_index = prev_index
+  if open_and_validate(M.list[prev_index]) then
+    M.active_index = prev_index
+  end
 end
 
 --- Close all popups in the list
